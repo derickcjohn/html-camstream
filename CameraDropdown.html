@@ -1,0 +1,79 @@
+<!-- CameraDropdown.html -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <?!= include('Stylesheet'); ?>
+    <script>
+      function GetTable() {
+    console.log('GetTable function called');
+    var displayMode = document.getElementById('displayMode').value;
+    var selectedDate = document.getElementById('date').value;
+
+    google.script.run.withSuccessHandler(function (tableHtml) {
+      console.log('Received table data:', tableHtml);
+      document.getElementById('tableContainer').innerHTML = tableHtml;
+    }).withFailureHandler(function (error) {
+      console.error('Error retrieving table data:', error);
+    }).getTable(displayMode, selectedDate);
+  }
+
+      function populateDropdowns() {
+  google.script.run.withSuccessHandler(function (cameras) {
+    populateDates();
+  }).getDates()
+}
+
+      function populateDates() {
+  google.script.run.withSuccessHandler(function (dates) {
+    var dateDropdown = document.getElementById('date');
+    dateDropdown.innerHTML = "";
+    dates.forEach(function (date) {
+      var option = document.createElement('option');
+      option.value = date;
+      option.text = date;
+      dateDropdown.add(option);
+    });
+
+    // Load the table when the dates are populated
+    GetTable();
+  }).getDates();
+}
+
+window.onload = function () {
+  populateDropdowns();
+
+  // No need for event listeners related to the camera dropdown
+  // document.getElementById('camera').addEventListener('change', function() {
+  //   populateDates(this.value);
+  // });
+
+  document.getElementById('date').addEventListener('change', function () {
+    GetTable();
+  });
+
+  document.getElementById('displayMode').addEventListener('change', function () {
+    GetTable();
+  });
+};
+    </script>
+  </head>
+  <body>
+    <h1>Web App for Camera Data</h1>
+    <form>
+      <br>
+      <label>Select a Date:</label>
+      <select name="date" id="date">
+        <!-- Options will be populated dynamically using JavaScript -->
+      </select>
+      <br>
+      <label>Select Display Mode:</label>
+      <select name="displayMode" id="displayMode">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+      </select>
+    </form>
+    <div id="tableContainer"></div>
+  </body>
+</html>
